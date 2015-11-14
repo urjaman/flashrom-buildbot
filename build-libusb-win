@@ -2,6 +2,7 @@
 
 . buildbot.conf
 
+libusb_src=$(realpath libusb)
 libusb_compat_src=$(realpath libusb-compat-0.1)
 
 old=`pwd`
@@ -16,11 +17,16 @@ if [ -z "$buildarch" ]; then
 	buildarch="$DEB_HOST_GNU_TYPE"
 fi
 
-# NB: Windows is special. To build libusb-win32 from source one needs a windows machine and sdk...
 for triplet in i686-w64-mingw32 x86_64-w64-mingw32; do
 	printf $triplet
 
-	# libusb must exist already
+	# libusb
+	cd ${libusb_src}
+	if [ -e Makefile ]; then
+		make distclean
+	fi
+	./autogen.sh --disable-shared --disable-debug-log --host=${triplet} --build="$buildarch" --prefix=${libs_base}/${triplet}/
+	make install
 
 	# libusb-compat afterwards
 	cd ${libusb_compat_src}
@@ -32,7 +38,7 @@ for triplet in i686-w64-mingw32 x86_64-w64-mingw32; do
 	# Make the header name match what flashrom expects of libusb-0.1 on windows
 	mv ${libs_base}/${triplet}/include/usb.h ${libs_base}/${triplet}/include/lusb0_usb.h
 	printf " successfully installed.\n"
-	
+
 done
 
 cd "$old"
