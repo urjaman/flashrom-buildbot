@@ -1,0 +1,24 @@
+download that -> http://sourceforge.net/projects/libusb/files/libusb-1.0/libusb-1.0.20/libusb-1.0.20.7z/download
+7z x it in a safe place
+
+mkdir -p cross-libs/{i686-w64-mingw32,x86_64-w64-mingw32}/{include,lib/pkgconfig}
+cp -a include/libusb-1.0 cross-libs/i686-w64-mingw32/include
+cp -a include/libusb-1.0 cross-libs/x86_64-w64-mingw32/include
+cp MinGW32/static/libusb-1.0.a cross-libs/i686-w64-mingw32/lib
+cp MinGW64/static/libusb-1.0.a cross-libs/x86_64-w64-mingw32/lib
+
+and make a pkg-config file for both, something like this (should be ok if just modify prefix):
+
+$ cat ~/cross-libs/i686-w64-mingw32/lib/pkgconfig/libusb-1.0.pc 
+
+prefix=/home/urjaman/cross-libs/i686-w64-mingw32
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libusb-1.0
+Description: C API for USB device access from Linux, Mac OS X, Windows and OpenBSD/NetBSD userspace
+Version: 1.0.20
+Libs: -L${libdir} -lusb-1.0
+Cflags: -I${includedir}/libusb-1.0
+
